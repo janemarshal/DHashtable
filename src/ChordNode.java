@@ -1,4 +1,4 @@
-package DHashtable;
+package DHashtable.src;
 
 /****** SALSA LANGUAGE IMPORTS ******/
 import salsa_lite.common.DeepCopy;
@@ -312,9 +312,9 @@ public class ChordNode extends MobileActor implements java.io.Serializable {
             this.nodeKey = new ChordKey( this.getName() );
             StageService.sendMessage(out, 12 /*println*/, new Object[]{this.getName() + "...." + this.nodeKey});
             this.nodeId = nodeKey.toString();
-            this.fingerTable = FingerTable.construct(0, new Object[]{((DHashtable.ChordNode)this.getStage().message.target)});
+            this.fingerTable = FingerTable.construct(0, new Object[]{((DHashtable.src.ChordNode)this.getStage().message.target)});
             this.local = new Hashtable(  );
-            StageService.sendMessage(((DHashtable.ChordNode)this.getStage().message.target), 9 /*create*/, null);
+            StageService.sendMessage(((DHashtable.src.ChordNode)this.getStage().message.target), 9 /*create*/, null);
         }
 
 
@@ -326,31 +326,31 @@ public class ChordNode extends MobileActor implements java.io.Serializable {
 
         public void create() {
             predecessor = null;
-            successor = ((DHashtable.ChordNode)this.getStage().message.target);
+            successor = ((DHashtable.src.ChordNode)this.getStage().message.target);
         }
 
         public void stabilize() {
             System.out.println(" \n\n");
             System.out.println("Stabilizing " + this.getName());
             TokenDirector node = StageService.sendTokenMessage(successor, 33 /*getPredecessor*/, null);
-            StageService.sendMessage(((DHashtable.ChordNode)this.getStage().message.target), 11 /*stabilize*/, new Object[]{node}, new int[]{0});
+            StageService.sendMessage(((DHashtable.src.ChordNode)this.getStage().message.target), 11 /*stabilize*/, new Object[]{node}, new int[]{0});
         }
 
         public void stabilize(ChordNode node) throws TokenPassException {
             if (node != null) {
                 System.out.println("Succ Pred is + " + node.getName());
                 TokenDirector key = StageService.sendTokenMessage(node, 31 /*getNodeKey*/, null);
-                TokenDirector selfKey = StageService.sendTokenMessage(((DHashtable.ChordNode)this.getStage().message.target), 31 /*getNodeKey*/, null);
+                TokenDirector selfKey = StageService.sendTokenMessage(((DHashtable.src.ChordNode)this.getStage().message.target), 31 /*getNodeKey*/, null);
                 TokenDirector successorKey = StageService.sendTokenMessage(successor, 31 /*getNodeKey*/, null);
-                StageService.sendPassMessage(((DHashtable.ChordNode)this.getStage().message.target), 12 /*stabilize*/, new Object[]{key, selfKey, successorKey, node}, new int[]{0, 1, 2}, this.getStage().message.continuationDirector);
+                StageService.sendPassMessage(((DHashtable.src.ChordNode)this.getStage().message.target), 12 /*stabilize*/, new Object[]{key, selfKey, successorKey, node}, new int[]{0, 1, 2}, this.getStage().message.continuationDirector);
                 throw new TokenPassException();
             }
             
-            StageService.sendMessage(successor, 13 /*notifyPredecessor*/, new Object[]{((DHashtable.ChordNode)this.getStage().message.target)});
+            StageService.sendMessage(successor, 13 /*notifyPredecessor*/, new Object[]{((DHashtable.src.ChordNode)this.getStage().message.target)});
         }
 
         public void stabilize(ChordKey key, ChordKey selfKey, ChordKey successorKey, ChordNode node) {
-            if ((((DHashtable.ChordNode)this.getStage().message.target) == successor) || key.isBetween(selfKey, successorKey)) {
+            if ((((DHashtable.src.ChordNode)this.getStage().message.target) == successor) || key.isBetween(selfKey, successorKey)) {
                 successor = node;
             }
             
@@ -361,8 +361,8 @@ public class ChordNode extends MobileActor implements java.io.Serializable {
                 System.out.println("Predecessor is + " + node.getName());
                 TokenDirector predecessorKey = StageService.sendTokenMessage(predecessor, 31 /*getNodeKey*/, null);
                 TokenDirector key = StageService.sendTokenMessage(node, 31 /*getNodeKey*/, null);
-                TokenDirector selfKey = StageService.sendTokenMessage(((DHashtable.ChordNode)this.getStage().message.target), 31 /*getNodeKey*/, null);
-                StageService.sendMessage(((DHashtable.ChordNode)this.getStage().message.target), 14 /*notifyPredecessor*/, new Object[]{node, key, selfKey, predecessorKey}, new int[]{1, 2, 3});
+                TokenDirector selfKey = StageService.sendTokenMessage(((DHashtable.src.ChordNode)this.getStage().message.target), 31 /*getNodeKey*/, null);
+                StageService.sendMessage(((DHashtable.src.ChordNode)this.getStage().message.target), 14 /*notifyPredecessor*/, new Object[]{node, key, selfKey, predecessorKey}, new int[]{1, 2, 3});
             }
             else {
                 predecessor = node;
@@ -381,8 +381,8 @@ public class ChordNode extends MobileActor implements java.io.Serializable {
             for (int i = 0; i < 32; i++) {
                 TokenDirector finger = StageService.sendTokenMessage(fingerTable, 4 /*getFinger*/, new Object[]{i});
                 TokenDirector key = StageService.sendTokenMessage(null, 2 /*getStart*/, null, finger);
-                TokenDirector successorNode = StageService.sendTokenMessage(((DHashtable.ChordNode)this.getStage().message.target), 19 /*findSuccessor*/, new Object[]{key}, new int[]{0});
-                StageService.sendMessage(((DHashtable.ChordNode)this.getStage().message.target), 22 /*setSuccessorNode*/, new Object[]{finger, successorNode}, new int[]{0, 1});
+                TokenDirector successorNode = StageService.sendTokenMessage(((DHashtable.src.ChordNode)this.getStage().message.target), 19 /*findSuccessor*/, new Object[]{key}, new int[]{0});
+                StageService.sendMessage(((DHashtable.src.ChordNode)this.getStage().message.target), 22 /*setSuccessorNode*/, new Object[]{finger, successorNode}, new int[]{0, 1});
             }
 
         }
@@ -391,7 +391,7 @@ public class ChordNode extends MobileActor implements java.io.Serializable {
             predecessor = null;
             ChordKey key = new ChordKey( this.getName() );
             TokenDirector successor = StageService.sendTokenMessage(rootNode, 19 /*findSuccessor*/, new Object[]{(ChordKey)DeepCopy.deepCopy( key )});
-            ContinuationDirector continuation_token = StageService.sendContinuationMessage(((DHashtable.ChordNode)this.getStage().message.target), 17 /*joinSuccessor*/, new Object[]{successor}, new int[]{0});
+            ContinuationDirector continuation_token = StageService.sendContinuationMessage(((DHashtable.src.ChordNode)this.getStage().message.target), 17 /*joinSuccessor*/, new Object[]{successor}, new int[]{0});
             continuation_token = StageService.sendContinuationMessage(local_output, 12 /*println*/, new Object[]{"node is  " + this.getName()}, continuation_token);
             class ExpressionDirector1 extends Actor {
                 public ExpressionDirector1(int stage_id) { super(stage_id); }
@@ -412,19 +412,19 @@ public class ChordNode extends MobileActor implements java.io.Serializable {
         public ChordNode findSuccessor(String nodeName) throws TokenPassException {
             ChordKey key = new ChordKey( nodeName );
             System.out.println("ChordKey found is " + key);
-            StageService.sendPassMessage(((DHashtable.ChordNode)this.getStage().message.target), 19 /*findSuccessor*/, new Object[]{(ChordKey)DeepCopy.deepCopy( key )}, this.getStage().message.continuationDirector);
+            StageService.sendPassMessage(((DHashtable.src.ChordNode)this.getStage().message.target), 19 /*findSuccessor*/, new Object[]{(ChordKey)DeepCopy.deepCopy( key )}, this.getStage().message.continuationDirector);
             throw new TokenPassException();
         }
 
         public ChordNode findSuccessor(ChordKey key) throws TokenPassException {
-            if (((DHashtable.ChordNode)this.getStage().message.target) == successor) {
-                return ((DHashtable.ChordNode)this.getStage().message.target);
+            if (((DHashtable.src.ChordNode)this.getStage().message.target) == successor) {
+                return ((DHashtable.src.ChordNode)this.getStage().message.target);
             }
             
             System.out.println("attempt for successor");
-            TokenDirector thisKey = StageService.sendTokenMessage(((DHashtable.ChordNode)this.getStage().message.target), 31 /*getNodeKey*/, null);
+            TokenDirector thisKey = StageService.sendTokenMessage(((DHashtable.src.ChordNode)this.getStage().message.target), 31 /*getNodeKey*/, null);
             TokenDirector successorKey = StageService.sendTokenMessage(successor, 31 /*getNodeKey*/, null);
-            StageService.sendPassMessage(((DHashtable.ChordNode)this.getStage().message.target), 20 /*findSuccessor*/, new Object[]{(ChordKey)DeepCopy.deepCopy( key ), thisKey, successorKey}, new int[]{1, 2}, this.getStage().message.continuationDirector);
+            StageService.sendPassMessage(((DHashtable.src.ChordNode)this.getStage().message.target), 20 /*findSuccessor*/, new Object[]{(ChordKey)DeepCopy.deepCopy( key ), thisKey, successorKey}, new int[]{1, 2}, this.getStage().message.continuationDirector);
             throw new TokenPassException();
         }
 
@@ -434,15 +434,15 @@ public class ChordNode extends MobileActor implements java.io.Serializable {
                 return successor;
             }
             else {
-                TokenDirector node = StageService.sendTokenMessage(((DHashtable.ChordNode)this.getStage().message.target), 23 /*closestPrecedingNode*/, new Object[]{(ChordKey)DeepCopy.deepCopy( key )});
-                StageService.sendPassMessage(((DHashtable.ChordNode)this.getStage().message.target), 21 /*findSuccessor*/, new Object[]{(ChordKey)DeepCopy.deepCopy( key ), node}, new int[]{1}, this.getStage().message.continuationDirector);
+                TokenDirector node = StageService.sendTokenMessage(((DHashtable.src.ChordNode)this.getStage().message.target), 23 /*closestPrecedingNode*/, new Object[]{(ChordKey)DeepCopy.deepCopy( key )});
+                StageService.sendPassMessage(((DHashtable.src.ChordNode)this.getStage().message.target), 21 /*findSuccessor*/, new Object[]{(ChordKey)DeepCopy.deepCopy( key ), node}, new int[]{1}, this.getStage().message.continuationDirector);
                 throw new TokenPassException();
             }
 
         }
 
         public ChordNode findSuccessor(ChordKey key, ChordNode node) throws TokenPassException {
-            if (node == ((DHashtable.ChordNode)this.getStage().message.target) && successor != null) {
+            if (node == ((DHashtable.src.ChordNode)this.getStage().message.target) && successor != null) {
                 StageService.sendPassMessage(successor, 19 /*findSuccessor*/, new Object[]{(ChordKey)DeepCopy.deepCopy( key )}, this.getStage().message.continuationDirector);
                 throw new TokenPassException();
             }
@@ -460,15 +460,15 @@ public class ChordNode extends MobileActor implements java.io.Serializable {
                 TokenDirector finger = StageService.sendTokenMessage(fingerTable, 4 /*getFinger*/, new Object[]{i});
                 TokenDirector node = StageService.sendTokenMessage(null, 4 /*getNode*/, null, finger);
                 TokenDirector fingerKey = StageService.sendTokenMessage(null, 31 /*getNodeKey*/, null, node);
-                TokenDirector nodeKey = StageService.sendTokenMessage(((DHashtable.ChordNode)this.getStage().message.target), 31 /*getNodeKey*/, null);
-                StageService.sendMessage(((DHashtable.ChordNode)this.getStage().message.target), 24 /*nextClosestNode*/, new Object[]{(ChordKey)DeepCopy.deepCopy( key ), nodeKey, fingerKey}, new int[]{1, 2});
+                TokenDirector nodeKey = StageService.sendTokenMessage(((DHashtable.src.ChordNode)this.getStage().message.target), 31 /*getNodeKey*/, null);
+                StageService.sendMessage(((DHashtable.src.ChordNode)this.getStage().message.target), 24 /*nextClosestNode*/, new Object[]{(ChordKey)DeepCopy.deepCopy( key ), nodeKey, fingerKey}, new int[]{1, 2});
                 if (success == true) {
                     StageService.passToken(node, this.getStage().message.continuationDirector);
                     throw new TokenPassException();
                 } 
             }
 
-            return ((DHashtable.ChordNode)this.getStage().message.target);
+            return ((DHashtable.src.ChordNode)this.getStage().message.target);
         }
 
         public void nextClosestNode(ChordKey key, ChordKey nodeKey, ChordKey fingerKey) {
@@ -488,7 +488,7 @@ public class ChordNode extends MobileActor implements java.io.Serializable {
 
         public void printFingerTable() {
             System.out.println("=======================================================");
-            System.out.println("FingerTable: " + ((DHashtable.ChordNode)this.getStage().message.target));
+            System.out.println("FingerTable: " + ((DHashtable.src.ChordNode)this.getStage().message.target));
             System.out.println("-------------------------------------------------------");
             System.out.println("Predecessor: " + predecessor);
             System.out.println("Successor: " + successor);
@@ -498,7 +498,7 @@ public class ChordNode extends MobileActor implements java.io.Serializable {
         public void continuePrint(Finger finger) {
             TokenDirector start = StageService.sendTokenMessage(finger, 2 /*getStart*/, null);
             TokenDirector node = StageService.sendTokenMessage(finger, 4 /*getNode*/, null);
-            StageService.sendMessage(((DHashtable.ChordNode)this.getStage().message.target), 28 /*continueToPrint*/, new Object[]{start, node}, new int[]{0, 1});
+            StageService.sendMessage(((DHashtable.src.ChordNode)this.getStage().message.target), 28 /*continueToPrint*/, new Object[]{start, node}, new int[]{0, 1});
         }
 
         public void continueToPrint(ChordKey start, ChordNode node) {

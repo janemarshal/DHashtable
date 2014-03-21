@@ -1,4 +1,4 @@
-package DHashtable;
+package DHashtable.src;
 
 /****** SALSA LANGUAGE IMPORTS ******/
 import salsa_lite.common.DeepCopy;

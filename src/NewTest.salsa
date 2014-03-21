@@ -1,4 +1,4 @@
-module DHashtable;
+module DHashtable.src;
 
 import salsa_lite.language.JoinDirector;
 import salsa_lite.runtime.io.StandardOutput;

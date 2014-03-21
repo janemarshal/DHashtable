@@ -1,4 +1,4 @@
-module DHashtable;
+module DHashtable.src;
 import object java.util.ArrayList;
 import object java.util.List;
 import object java.util.SortedMap;

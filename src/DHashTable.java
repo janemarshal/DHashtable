@@ -1,4 +1,4 @@
-package DHashtable;
+package DHashtable.src;
 
 /****** SALSA LANGUAGE IMPORTS ******/
 import salsa_lite.common.DeepCopy;
@@ -36,6 +36,8 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import javasrc.ChordKey;
 import java.util.Scanner;
+import java.io.FileNotFoundException;
+import java.io.File;
 
 public class DHashTable extends MobileActor implements java.io.Serializable {
 
@@ -117,7 +119,7 @@ public class DHashTable extends MobileActor implements java.io.Serializable {
         if (name == null || nameserver_info == null) {
             System.err.println("Error starting DHashTable: to run a mobile actor you must specify a name with the '-Dcalled=<name>' system property and a namesever with the '-Dusing=\"<nameserver_host>:<nameserver_port>/<nameserver_name>\"' system property.");
             System.err.println("usage: (port is optional and 4040 by default)");
-            System.err.println("	java -Dcalled=\"<name>\" [-Dport=4040] DHashtable.DHashTable");
+            System.err.println("	java -Dcalled=\"<name>\" [-Dport=4040] DHashtable.src.DHashTable");
             System.exit(0);
         }
         try {
@@ -306,8 +308,9 @@ public class DHashTable extends MobileActor implements java.io.Serializable {
                 case 22: nodeStabilizer( (ChordNode)arguments[0], (ChordNode)arguments[1] ); return null;
                 case 23: printNode( (String)arguments[0], (ChordNode)arguments[1] ); return null;
                 case 24: printMessage( (String)arguments[0], (ChordNode)arguments[1] ); return null;
-                case 25: addNode( (String)arguments[0], (Integer)arguments[1], (Chord)arguments[2] ); return null;
-                case 26: removeNode(); return null;
+                case 25: test1(); return null;
+                case 26: addNode( (String)arguments[0], (Integer)arguments[1], (Chord)arguments[2] ); return null;
+                case 27: removeNode(); return null;
                 default: throw new MessageHandlerNotFoundException(messageId, arguments);
             }
         }
@@ -328,7 +331,7 @@ public class DHashTable extends MobileActor implements java.io.Serializable {
         public void construct(ArrayList<String> hosts, ArrayList<Integer> ports) {
             this.origin_output = StandardOutput.construct(0, null);
             this.ns = this.getNameServer();
-            StageService.sendMessage(((DHashtable.DHashTable)this.getStage().message.target), 13 /*process*/, new Object[]{ns, (ArrayList)DeepCopy.deepCopy( hosts ), (ArrayList)DeepCopy.deepCopy( ports )});
+            StageService.sendMessage(((DHashtable.src.DHashTable)this.getStage().message.target), 13 /*process*/, new Object[]{ns, (ArrayList)DeepCopy.deepCopy( hosts ), (ArrayList)DeepCopy.deepCopy( ports )});
         }
 
         public void construct(String[] args) {
@@ -347,7 +350,7 @@ public class DHashTable extends MobileActor implements java.io.Serializable {
                 ports.add(Integer.parseInt(args[2]) + i);
             }
 
-            StageService.sendMessage(((DHashtable.DHashTable)this.getStage().message.target), 13 /*process*/, new Object[]{ns, (ArrayList)DeepCopy.deepCopy( hosts ), (ArrayList)DeepCopy.deepCopy( ports )});
+            StageService.sendMessage(((DHashtable.src.DHashTable)this.getStage().message.target), 13 /*process*/, new Object[]{ns, (ArrayList)DeepCopy.deepCopy( hosts ), (ArrayList)DeepCopy.deepCopy( ports )});
         }
 
 
@@ -363,7 +366,7 @@ public class DHashTable extends MobileActor implements java.io.Serializable {
             System.out.println("Here is " + value + " Key is " + dataKey);
             if (chord != null) {
                 TokenDirector node = StageService.sendTokenMessage(chord, 6 /*getNode*/, new Object[]{0});
-                StageService.sendMessage(((DHashtable.DHashTable)this.getStage().message.target), 11 /*findNode*/, new Object[]{"Put in ", (ChordKey)DeepCopy.deepCopy( dataKey ), node}, new int[]{2});
+                StageService.sendMessage(((DHashtable.src.DHashTable)this.getStage().message.target), 11 /*findNode*/, new Object[]{"Put in ", (ChordKey)DeepCopy.deepCopy( dataKey ), node}, new int[]{2});
             }
             
             StageService.sendPassMessage(chord, 3 /*getSortedNodeSize*/, null, this.getStage().message.continuationDirector);
@@ -373,8 +376,10 @@ public class DHashTable extends MobileActor implements java.io.Serializable {
         public void lookUp(String key) {
             ChordKey dataKey = new ChordKey( key );
             System.out.println("Search for key is " + key + " - " + dataKey);
+            ContinuationDirector continuation_token = StageService.sendContinuationMessage(StandardOutput.construct(0, null), 12 /*println*/, new Object[]{"Searching"});
             if (chord != null) {
-                StageService.sendPassMessage(StandardOutput.construct(0, null), 12 /*println*/, new Object[]{" LOOKUP is executing"}, this.getStage().message.continuationDirector);
+                TokenDirector node = StageService.sendPassMessage(chord, 7 /*getSortedNode*/, new Object[]{0}, continuation_token, this.getStage().message.continuationDirector);
+                StageService.sendPassMessage(((DHashtable.src.DHashTable)this.getStage().message.target), 11 /*findNode*/, new Object[]{"Found in ", (ChordKey)DeepCopy.deepCopy( dataKey ), node}, new int[]{2}, this.getStage().message.continuationDirector);
             }
             
             return;
@@ -383,7 +388,7 @@ public class DHashTable extends MobileActor implements java.io.Serializable {
         public void findNode(String message, ChordKey dataKey, ChordNode node) {
             if (node != null) {
                 TokenDirector responsibleNode = StageService.sendTokenMessage(node, 19 /*findSuccessor*/, new Object[]{(ChordKey)DeepCopy.deepCopy( dataKey )});
-                StageService.sendMessage(((DHashtable.DHashTable)this.getStage().message.target), 12 /*storedIn*/, new Object[]{message, (ChordKey)DeepCopy.deepCopy( dataKey ), responsibleNode}, new int[]{2});
+                StageService.sendMessage(((DHashtable.src.DHashTable)this.getStage().message.target), 12 /*storedIn*/, new Object[]{message, (ChordKey)DeepCopy.deepCopy( dataKey ), responsibleNode}, new int[]{2});
             }
             else {
                 StageService.sendMessage(StandardOutput.construct(0, null), 12 /*println*/, new Object[]{node + " >>>  Null node is rejected <<<"});
@@ -410,27 +415,21 @@ public class DHashTable extends MobileActor implements java.io.Serializable {
             }
 
             ContinuationDirector continuation_token = StageService.sendContinuationMessage(jd, 3 /*resolveAfter*/, new Object[]{num_of_nodes});
-            continuation_token = StageService.sendContinuationMessage(((DHashtable.DHashTable)this.getStage().message.target), 14 /*sortNodes*/, new Object[]{chord}, continuation_token);
+            continuation_token = StageService.sendContinuationMessage(((DHashtable.src.DHashTable)this.getStage().message.target), 14 /*sortNodes*/, new Object[]{chord}, continuation_token);
             continuation_token = StageService.sendContinuationMessage(chord, 3 /*getSortedNodeSize*/, null, continuation_token);
-            continuation_token = StageService.sendContinuationMessage(((DHashtable.DHashTable)this.getStage().message.target), 15 /*stabilizeNodes*/, null, continuation_token);
-            continuation_token = StageService.sendContinuationMessage(((DHashtable.DHashTable)this.getStage().message.target), 20 /*printChord*/, new Object[]{chord}, continuation_token);
-            continuation_token = StageService.sendContinuationMessage(((DHashtable.DHashTable)this.getStage().message.target), 18 /*fixFingerTable*/, new Object[]{chord}, continuation_token);
-            continuation_token = StageService.sendContinuationMessage(((DHashtable.DHashTable)this.getStage().message.target), 19 /*printFingers*/, new Object[]{chord}, continuation_token);
+            continuation_token = StageService.sendContinuationMessage(((DHashtable.src.DHashTable)this.getStage().message.target), 15 /*stabilizeNodes*/, null, continuation_token);
+            continuation_token = StageService.sendContinuationMessage(((DHashtable.src.DHashTable)this.getStage().message.target), 20 /*printChord*/, new Object[]{chord}, continuation_token);
+            continuation_token = StageService.sendContinuationMessage(((DHashtable.src.DHashTable)this.getStage().message.target), 18 /*fixFingerTable*/, new Object[]{chord}, continuation_token);
+            continuation_token = StageService.sendContinuationMessage(((DHashtable.src.DHashTable)this.getStage().message.target), 19 /*printFingers*/, new Object[]{chord}, continuation_token);
             continuation_token = StageService.sendContinuationMessage(origin_output, 12 /*println*/, new Object[]{"DONE"}, continuation_token);
-            continuation_token = StageService.sendContinuationMessage(((DHashtable.DHashTable)this.getStage().message.target), 9 /*put*/, new Object[]{"find1", "one"}, continuation_token);
-            continuation_token = StageService.sendContinuationMessage(((DHashtable.DHashTable)this.getStage().message.target), 9 /*put*/, new Object[]{"remote2", "two"}, continuation_token);
-            continuation_token = StageService.sendContinuationMessage(((DHashtable.DHashTable)this.getStage().message.target), 9 /*put*/, new Object[]{"thse ar so redi", "three"}, continuation_token);
-            continuation_token = StageService.sendContinuationMessage(((DHashtable.DHashTable)this.getStage().message.target), 9 /*put*/, new Object[]{"multiple", "four"}, continuation_token);
-            continuation_token = StageService.sendContinuationMessage(((DHashtable.DHashTable)this.getStage().message.target), 10 /*lookUp*/, new Object[]{"multiple"}, continuation_token);
-            continuation_token = StageService.sendContinuationMessage(((DHashtable.DHashTable)this.getStage().message.target), 26 /*removeNode*/, null, continuation_token);
-            StageService.sendPassMessage(((DHashtable.DHashTable)this.getStage().message.target), 25 /*addNode*/, new Object[]{"127.0.0.1", 4045, chord}, continuation_token, this.getStage().message.continuationDirector);
+            StageService.sendPassMessage(((DHashtable.src.DHashTable)this.getStage().message.target), 25 /*test1*/, null, continuation_token, this.getStage().message.continuationDirector);
             throw new TokenPassException();
         }
 
         public void sortNodes(Chord chord) throws TokenPassException {
             JoinDirector jd = JoinDirector.construct(0, null);
             for (int i = 0; i < num_of_nodes; i++) {
-                ContinuationDirector continuation_token = StageService.sendContinuationMessage(((DHashtable.DHashTable)this.getStage().message.target), 24 /*printMessage*/, new Object[]{i + " From sort Node : ", StageService.sendImplicitTokenMessage(chord, 7 /*getSortedNode*/, new Object[]{i})}, new int[]{1});
+                ContinuationDirector continuation_token = StageService.sendContinuationMessage(((DHashtable.src.DHashTable)this.getStage().message.target), 24 /*printMessage*/, new Object[]{i + " From sort Node : ", StageService.sendImplicitTokenMessage(chord, 7 /*getSortedNode*/, new Object[]{i})}, new int[]{1});
                 StageService.sendMessage(jd, 2 /*join*/, null, continuation_token);
                 System.out.println("Sort = " + i);
             }
@@ -448,16 +447,16 @@ public class DHashTable extends MobileActor implements java.io.Serializable {
             TokenDirector rootNode = StageService.sendTokenMessage(chord, 7 /*getSortedNode*/, new Object[]{0});
             TokenDirector precedingNode = TokenDirector.construct(1, new Object[]{null});
             TokenDirector node;
-            continuation_token = StageService.sendContinuationMessage(((DHashtable.DHashTable)this.getStage().message.target), 23 /*printNode*/, new Object[]{" Root Node is ", thisNode}, new int[]{1});
+            continuation_token = StageService.sendContinuationMessage(((DHashtable.src.DHashTable)this.getStage().message.target), 23 /*printNode*/, new Object[]{" Root Node is ", thisNode}, new int[]{1});
             for (int i = 0; i < num_of_nodes - 1; i++) {
                 node = StageService.sendTokenMessage(chord, 7 /*getSortedNode*/, new Object[]{i + 1});
-                continuation_token = StageService.sendContinuationMessage(((DHashtable.DHashTable)this.getStage().message.target), 23 /*printNode*/, new Object[]{"From stabilize node: ", node}, new int[]{1}, continuation_token);
+                continuation_token = StageService.sendContinuationMessage(((DHashtable.src.DHashTable)this.getStage().message.target), 23 /*printNode*/, new Object[]{"From stabilize node: ", node}, new int[]{1}, continuation_token);
                 continuation_token = StageService.sendContinuationMessage(null, 36 /*setSuccessor*/, new Object[]{node}, new int[]{0}, continuation_token, thisNode);
                 continuation_token = StageService.sendContinuationMessage(null, 34 /*setPredecessor*/, new Object[]{precedingNode}, new int[]{0}, continuation_token, thisNode);
                 precedingNode = thisNode;
                 thisNode = node;
                 continuation_token = StageService.sendContinuationMessage(null, 10 /*stabilize*/, null, continuation_token, node);
-                continuation_token = StageService.sendContinuationMessage(((DHashtable.DHashTable)this.getStage().message.target), 22 /*nodeStabilizer*/, new Object[]{precedingNode, StageService.sendImplicitTokenMessage(null, 35 /*getSuccessor*/, null, continuation_token, node)}, new int[]{0, 1});
+                continuation_token = StageService.sendContinuationMessage(((DHashtable.src.DHashTable)this.getStage().message.target), 22 /*nodeStabilizer*/, new Object[]{precedingNode, StageService.sendImplicitTokenMessage(null, 35 /*getSuccessor*/, null, continuation_token, node)}, new int[]{0, 1});
                 StageService.sendMessage(jd, 2 /*join*/, null, continuation_token);
             }
 
@@ -511,10 +510,10 @@ public class DHashTable extends MobileActor implements java.io.Serializable {
             JoinDirector jd = JoinDirector.construct(0, null);
             TokenDirector node;
             for (int i = 0; i < num_of_nodes; i++) {
-                continuation_token = StageService.sendContinuationMessage(((DHashtable.DHashTable)this.getStage().message.target), 24 /*printMessage*/, new Object[]{"Printing Chord: ", StageService.sendImplicitTokenMessage(chord, 7 /*getSortedNode*/, new Object[]{i})}, new int[]{1});
+                continuation_token = StageService.sendContinuationMessage(((DHashtable.src.DHashTable)this.getStage().message.target), 24 /*printMessage*/, new Object[]{"Printing Chord: ", StageService.sendImplicitTokenMessage(chord, 7 /*getSortedNode*/, new Object[]{i})}, new int[]{1});
                 node = StageService.sendTokenMessage(chord, 7 /*getSortedNode*/, new Object[]{i}, continuation_token);
-                continuation_token = StageService.sendContinuationMessage(((DHashtable.DHashTable)this.getStage().message.target), 24 /*printMessage*/, new Object[]{i + " : Successor: ", StageService.sendImplicitTokenMessage(null, 35 /*getSuccessor*/, null, continuation_token, node)}, new int[]{1});
-                continuation_token = StageService.sendContinuationMessage(((DHashtable.DHashTable)this.getStage().message.target), 24 /*printMessage*/, new Object[]{i + " : Pedecessor: ", StageService.sendImplicitTokenMessage(null, 33 /*getPredecessor*/, null, continuation_token, node)}, new int[]{1});
+                continuation_token = StageService.sendContinuationMessage(((DHashtable.src.DHashTable)this.getStage().message.target), 24 /*printMessage*/, new Object[]{i + " : Successor: ", StageService.sendImplicitTokenMessage(null, 35 /*getSuccessor*/, null, continuation_token, node)}, new int[]{1});
+                continuation_token = StageService.sendContinuationMessage(((DHashtable.src.DHashTable)this.getStage().message.target), 24 /*printMessage*/, new Object[]{i + " : Pedecessor: ", StageService.sendImplicitTokenMessage(null, 33 /*getPredecessor*/, null, continuation_token, node)}, new int[]{1});
                 StageService.sendMessage(jd, 2 /*join*/, null, continuation_token);
             }
 
@@ -548,6 +547,27 @@ public class DHashTable extends MobileActor implements java.io.Serializable {
             throw new TokenPassException();
         }
 
+        public void test1() {
+            Scanner sc2 = null;
+            try {
+                sc2 = new Scanner( new File( "text1.txt" ) );
+            }
+            catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+
+            while (sc2.hasNextLine()) {
+                Scanner s2 = new Scanner( sc2.nextLine() );
+                boolean b;
+                while (b = s2.hasNext()) {
+                    String s = null;
+                    System.out.println(s);
+                }
+
+            }
+
+        }
+
         public void addNode(String host, int port, Chord chord) throws TokenPassException {
             TokenDirector node = ChordNode.construct(0, new Object[]{StandardOutput.construct(0, null)}, "rc_" + num_of_nodes, ns, host, port);
             StageService.sendPassMessage(chord, 2 /*createNode*/, new Object[]{node}, new int[]{0}, this.getStage().message.continuationDirector);
@@ -561,14 +581,14 @@ public class DHashTable extends MobileActor implements java.io.Serializable {
             ContinuationDirector continuation_token = StageService.sendContinuationMessage(origin_output, 12 /*println*/, new Object[]{"Removing Node"});
             continuation_token = StageService.sendContinuationMessage(null, 36 /*setSuccessor*/, new Object[]{node}, new int[]{0}, continuation_token, node);
             continuation_token = StageService.sendContinuationMessage(null, 34 /*setPredecessor*/, new Object[]{node}, new int[]{0}, continuation_token, node);
-            continuation_token = StageService.sendContinuationMessage(((DHashtable.DHashTable)this.getStage().message.target), 24 /*printMessage*/, new Object[]{"Successor is ", succe}, new int[]{1}, continuation_token);
-            continuation_token = StageService.sendContinuationMessage(((DHashtable.DHashTable)this.getStage().message.target), 24 /*printMessage*/, new Object[]{"Predecessor is ", prede}, new int[]{1}, continuation_token);
-            continuation_token = StageService.sendContinuationMessage(((DHashtable.DHashTable)this.getStage().message.target), 24 /*printMessage*/, new Object[]{"Successor null ", StageService.sendImplicitTokenMessage(null, 35 /*getSuccessor*/, null, continuation_token, node)}, new int[]{1});
-            continuation_token = StageService.sendContinuationMessage(((DHashtable.DHashTable)this.getStage().message.target), 24 /*printMessage*/, new Object[]{"Predecessor null ", StageService.sendImplicitTokenMessage(null, 33 /*getPredecessor*/, null, continuation_token, node)}, new int[]{1});
+            continuation_token = StageService.sendContinuationMessage(((DHashtable.src.DHashTable)this.getStage().message.target), 24 /*printMessage*/, new Object[]{"Successor is ", succe}, new int[]{1}, continuation_token);
+            continuation_token = StageService.sendContinuationMessage(((DHashtable.src.DHashTable)this.getStage().message.target), 24 /*printMessage*/, new Object[]{"Predecessor is ", prede}, new int[]{1}, continuation_token);
+            continuation_token = StageService.sendContinuationMessage(((DHashtable.src.DHashTable)this.getStage().message.target), 24 /*printMessage*/, new Object[]{"Successor null ", StageService.sendImplicitTokenMessage(null, 35 /*getSuccessor*/, null, continuation_token, node)}, new int[]{1});
+            continuation_token = StageService.sendContinuationMessage(((DHashtable.src.DHashTable)this.getStage().message.target), 24 /*printMessage*/, new Object[]{"Predecessor null ", StageService.sendImplicitTokenMessage(null, 33 /*getPredecessor*/, null, continuation_token, node)}, new int[]{1});
             continuation_token = StageService.sendContinuationMessage(null, 36 /*setSuccessor*/, new Object[]{succe}, new int[]{0}, continuation_token, prede);
             continuation_token = StageService.sendContinuationMessage(null, 34 /*setPredecessor*/, new Object[]{prede}, new int[]{0}, continuation_token, succe);
             continuation_token = StageService.sendContinuationMessage(origin_output, 12 /*println*/, new Object[]{"Printing Chord after Removing 2"}, continuation_token);
-            continuation_token = StageService.sendContinuationMessage(((DHashtable.DHashTable)this.getStage().message.target), 20 /*printChord*/, new Object[]{chord}, continuation_token);
+            continuation_token = StageService.sendContinuationMessage(((DHashtable.src.DHashTable)this.getStage().message.target), 20 /*printChord*/, new Object[]{chord}, continuation_token);
             StageService.sendPassMessage(origin_output, 12 /*println*/, new Object[]{"Printing Chord DONE after Removing 2"}, continuation_token, this.getStage().message.continuationDirector);
             throw new TokenPassException();
         }

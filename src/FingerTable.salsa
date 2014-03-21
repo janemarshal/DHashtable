@@ -1,4 +1,4 @@
-module DHashtable;
+module DHashtable.src;
 
 import object javasrc.ChordKey;
 
