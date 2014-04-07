@@ -1,4 +1,4 @@
-module DHashtable;
+module src;
 
 import salsa_lite.language.JoinDirector;
 import salsa_lite.runtime.io.StandardOutput;
@@ -9,6 +9,11 @@ import salsa_lite.runtime.wwc.NameServer;
 
 behavior NewTest extends MobileActor {
     NewTest(String[] ar) {
+	
+	public static final int NUM_OF_NODES = 10;
+
+	Hash.setFunction(HASH_FUNCTION);
+	Hash.setKeyLength(KEY_LENGTH);
 
         ArrayList<String> hosts = new ArrayList<String>();
         ArrayList<Integer> ports = new ArrayList<Integer>();

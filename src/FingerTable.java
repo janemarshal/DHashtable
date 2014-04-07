@@ -1,4 +1,4 @@
-package DHashtable;
+package src;
 
 /****** SALSA LANGUAGE IMPORTS ******/
 import salsa_lite.common.DeepCopy;
@@ -108,7 +108,7 @@ public class FingerTable extends salsa_lite.runtime.Actor implements java.io.Ser
     public void construct(ChordNode node) {
         this.fingers = new Finger[32];
         for (int i = 0; i < fingers.length; i++) {
-            TokenDirector start = StageService.sendTokenMessage(this, 3 /*getStartKey*/, new Object[]{StageService.sendImplicitTokenMessage(node, 31 /*getNodeKey*/, null), i}, new int[]{0});
+            TokenDirector start = StageService.sendTokenMessage(this, 3 /*getStartKey*/, new Object[]{StageService.sendImplicitTokenMessage(node, 32 /*getNodeKey*/, null), i}, new int[]{0});
             StageService.sendMessage(this, 2 /*createFinger*/, new Object[]{start, node, i}, new int[]{0});
         }
 

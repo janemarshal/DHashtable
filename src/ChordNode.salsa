@@ -1,4 +1,4 @@
-module DHashtable;
+module src;
 
 import object java.io.PrintStream;
 import object javasrc.ChordKey;
@@ -15,7 +15,8 @@ behavior ChordNode extends MobileActor{
     boolean success = false;
     StandardOutput origin_output;
     StandardOutput local_output;
-    Hashtable local;
+    Hashtable<ChordKey, String> local;
+    int count = 0;
     
        ack go() {
        new StandardOutput()<-println("Hello from: " + self.getName() + "!") @
@@ -29,13 +30,18 @@ behavior ChordNode extends MobileActor{
         out<-println(self.getName() + "...." + self.nodeKey);
         self.nodeId = nodeKey.toString();
         self.fingerTable = new FingerTable(self);
-        self.local = new Hashtable();
+        self.local = new Hashtable<ChordKey, String>();
         self<-create();
     }
 
     ack create() {
         predecessor = null;
         successor = self;
+    }
+
+    ack put(ChordKey key,String value) {
+        local.put(key, value);
+        local_output<-println(++count + " Storing " + key);
     }
 
     ack stabilize() {
@@ -97,8 +103,8 @@ behavior ChordNode extends MobileActor{
         token ChordNode successor = rootNode<-findSuccessor(key);
         self<-joinSuccessor(successor) @
         local_output<-println("node is  " + self.getName()) @
-        local_output<-println("Succesor  " + successor) @
-        local_output<-println("Predecesor  " + predecessor) @
+        //local_output<-println("Succesor  " + successor) @
+        //local_output<-println("Predecesor  " + predecessor) @
         pass;
     }
 
@@ -116,7 +122,7 @@ behavior ChordNode extends MobileActor{
         if (self == successor) {
             pass self;
         }
-        System.out.println("attempt for successor");
+       // System.out.println("attempt for successor");
         token ChordKey thisKey = self<-getNodeKey();
         token ChordKey successorKey = successor<-getNodeKey();
         pass self<-findSuccessor(key, thisKey, successorKey);
@@ -125,7 +131,7 @@ behavior ChordNode extends MobileActor{
     ChordNode findSuccessor(ChordKey key, ChordKey thisKey, ChordKey successorKey){    
         if (key.isBetween(thisKey, successorKey)
                 || key.compareTo(successorKey) == 0) {
-            System.out.println("Successor is " + successor);
+          //  System.out.println("Successor is " + successor);
             pass successor;
         } else {
             token ChordNode node = self<-closestPrecedingNode(key);
@@ -212,7 +218,13 @@ behavior ChordNode extends MobileActor{
         pass predecessor;
     }
 
-    ack setPredecessor(ChordNode predecessor) {
+    ack setRootPredecessor(ChordNode predecessor) {
+	new StandardOutput()<-println("predecessor" + predecessor);
+	
+        self.predecessor = predecessor;
+    }
+
+    ack setPredecessor(ChordNode predecessor) {	
         self.predecessor = predecessor;
     }
 

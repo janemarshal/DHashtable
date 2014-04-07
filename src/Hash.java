@@ -1,11 +1,11 @@
-package DHashtable;
+package src;
 
 import java.security.MessageDigest;
 import java.util.zip.CRC32;
 
 public class Hash {
 
-	public static String function = "CRC32";
+	public static final String HASH_FUNCTION = "SHA-1";
 
 	public static int KEY_LENGTH = 32;
 

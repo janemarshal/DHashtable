@@ -1,4 +1,4 @@
-package DHashtable;
+package src;
 
 /****** SALSA LANGUAGE IMPORTS ******/
 import salsa_lite.common.DeepCopy;
@@ -114,7 +114,7 @@ public class NewTest extends MobileActor implements java.io.Serializable {
         if (name == null || nameserver_info == null) {
             System.err.println("Error starting NewTest: to run a mobile actor you must specify a name with the '-Dcalled=<name>' system property and a namesever with the '-Dusing=\"<nameserver_host>:<nameserver_port>/<nameserver_name>\"' system property.");
             System.err.println("usage: (port is optional and 4040 by default)");
-            System.err.println("	java -Dcalled=\"<name>\" [-Dport=4040] DHashtable.NewTest");
+            System.err.println("	java -Dcalled=\"<name>\" [-Dport=4040] src.NewTest");
             System.exit(0);
         }
         try {

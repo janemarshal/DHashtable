@@ -1,4 +1,4 @@
-package DHashtable;
+package src;
 
 /****** SALSA LANGUAGE IMPORTS ******/
 import salsa_lite.common.DeepCopy;
@@ -121,7 +121,7 @@ public class Chord extends salsa_lite.runtime.Actor implements java.io.Serializa
 
     public void createNode(ChordNode node) throws TokenPassException {
         nodeList.add(node);
-        StageService.sendPassMessage(this, 5 /*createNode*/, new Object[]{StageService.sendImplicitTokenMessage(node, 31 /*getNodeKey*/, null), node}, new int[]{0}, this.getStage().message.continuationDirector);
+        StageService.sendPassMessage(this, 5 /*createNode*/, new Object[]{StageService.sendImplicitTokenMessage(node, 32 /*getNodeKey*/, null), node}, new int[]{0}, this.getStage().message.continuationDirector);
         throw new TokenPassException();
     }
 

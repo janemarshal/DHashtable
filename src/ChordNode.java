@@ -1,4 +1,4 @@
-package DHashtable;
+package src;
 
 /****** SALSA LANGUAGE IMPORTS ******/
 import salsa_lite.common.DeepCopy;
@@ -251,7 +251,8 @@ public class ChordNode extends MobileActor implements java.io.Serializable {
         boolean success = false;
         StandardOutput origin_output;
         StandardOutput local_output;
-        Hashtable local;
+        Hashtable<ChordKey,String> local;
+        int count = 0;
 
 
         public Object invokeMessage(int messageId, Object[] arguments) throws RemoteMessageException, TokenPassException, MessageHandlerNotFoundException {
@@ -266,35 +267,37 @@ public class ChordNode extends MobileActor implements java.io.Serializable {
                 case 7: return getNameServer();
                 case 8: go(); return null;
                 case 9: create(); return null;
-                case 10: stabilize(); return null;
-                case 11: stabilize( (ChordNode)arguments[0] ); return null;
-                case 12: stabilize( (ChordKey)arguments[0], (ChordKey)arguments[1], (ChordKey)arguments[2], (ChordNode)arguments[3] ); return null;
-                case 13: notifyPredecessor( (ChordNode)arguments[0] ); return null;
-                case 14: notifyPredecessor( (ChordNode)arguments[0], (ChordKey)arguments[1], (ChordKey)arguments[2], (ChordKey)arguments[3] ); return null;
-                case 15: fixFingers(); return null;
-                case 16: joinNode( (ChordNode)arguments[0] ); return null;
-                case 17: joinSuccessor( (ChordNode)arguments[0] ); return null;
-                case 18: return findSuccessor( (String)arguments[0] );
-                case 19: return findSuccessor( (ChordKey)arguments[0] );
-                case 20: return findSuccessor( (ChordKey)arguments[0], (ChordKey)arguments[1], (ChordKey)arguments[2] );
-                case 21: return findSuccessor( (ChordKey)arguments[0], (ChordNode)arguments[1] );
-                case 22: setSuccessorNode( (Finger)arguments[0], (ChordNode)arguments[1] ); return null;
-                case 23: return closestPrecedingNode( (ChordKey)arguments[0] );
-                case 24: nextClosestNode( (ChordKey)arguments[0], (ChordKey)arguments[1], (ChordKey)arguments[2] ); return null;
-                case 25: return toString();
-                case 26: printFingerTable(); return null;
-                case 27: continuePrint( (Finger)arguments[0] ); return null;
-                case 28: continueToPrint( (ChordKey)arguments[0], (ChordNode)arguments[1] ); return null;
-                case 29: return getNodeId();
-                case 30: setNodeId( (String)arguments[0] ); return null;
-                case 31: return getNodeKey();
-                case 32: setNodeKey( (ChordKey)arguments[0] ); return null;
-                case 33: return getPredecessor();
-                case 34: setPredecessor( (ChordNode)arguments[0] ); return null;
-                case 35: return getSuccessor();
-                case 36: setSuccessor( (ChordNode)arguments[0] ); return null;
-                case 37: return getFingerTable();
-                case 38: setFingerTable( (FingerTable)arguments[0] ); return null;
+                case 10: put( (ChordKey)arguments[0], (String)arguments[1] ); return null;
+                case 11: stabilize(); return null;
+                case 12: stabilize( (ChordNode)arguments[0] ); return null;
+                case 13: stabilize( (ChordKey)arguments[0], (ChordKey)arguments[1], (ChordKey)arguments[2], (ChordNode)arguments[3] ); return null;
+                case 14: notifyPredecessor( (ChordNode)arguments[0] ); return null;
+                case 15: notifyPredecessor( (ChordNode)arguments[0], (ChordKey)arguments[1], (ChordKey)arguments[2], (ChordKey)arguments[3] ); return null;
+                case 16: fixFingers(); return null;
+                case 17: joinNode( (ChordNode)arguments[0] ); return null;
+                case 18: joinSuccessor( (ChordNode)arguments[0] ); return null;
+                case 19: return findSuccessor( (String)arguments[0] );
+                case 20: return findSuccessor( (ChordKey)arguments[0] );
+                case 21: return findSuccessor( (ChordKey)arguments[0], (ChordKey)arguments[1], (ChordKey)arguments[2] );
+                case 22: return findSuccessor( (ChordKey)arguments[0], (ChordNode)arguments[1] );
+                case 23: setSuccessorNode( (Finger)arguments[0], (ChordNode)arguments[1] ); return null;
+                case 24: return closestPrecedingNode( (ChordKey)arguments[0] );
+                case 25: nextClosestNode( (ChordKey)arguments[0], (ChordKey)arguments[1], (ChordKey)arguments[2] ); return null;
+                case 26: return toString();
+                case 27: printFingerTable(); return null;
+                case 28: continuePrint( (Finger)arguments[0] ); return null;
+                case 29: continueToPrint( (ChordKey)arguments[0], (ChordNode)arguments[1] ); return null;
+                case 30: return getNodeId();
+                case 31: setNodeId( (String)arguments[0] ); return null;
+                case 32: return getNodeKey();
+                case 33: setNodeKey( (ChordKey)arguments[0] ); return null;
+                case 34: return getPredecessor();
+                case 35: setRootPredecessor( (ChordNode)arguments[0] ); return null;
+                case 36: setPredecessor( (ChordNode)arguments[0] ); return null;
+                case 37: return getSuccessor();
+                case 38: setSuccessor( (ChordNode)arguments[0] ); return null;
+                case 39: return getFingerTable();
+                case 40: setFingerTable( (FingerTable)arguments[0] ); return null;
                 default: throw new MessageHandlerNotFoundException(messageId, arguments);
             }
         }
@@ -312,9 +315,9 @@ public class ChordNode extends MobileActor implements java.io.Serializable {
             this.nodeKey = new ChordKey( this.getName() );
             StageService.sendMessage(out, 12 /*println*/, new Object[]{this.getName() + "...." + this.nodeKey});
             this.nodeId = nodeKey.toString();
-            this.fingerTable = FingerTable.construct(0, new Object[]{((DHashtable.ChordNode)this.getStage().message.target)});
-            this.local = new Hashtable(  );
-            StageService.sendMessage(((DHashtable.ChordNode)this.getStage().message.target), 9 /*create*/, null);
+            this.fingerTable = FingerTable.construct(0, new Object[]{((src.ChordNode)this.getStage().message.target)});
+            this.local = new Hashtable<ChordKey,String>(  );
+            StageService.sendMessage(((src.ChordNode)this.getStage().message.target), 9 /*create*/, null);
         }
 
 
@@ -326,31 +329,36 @@ public class ChordNode extends MobileActor implements java.io.Serializable {
 
         public void create() {
             predecessor = null;
-            successor = ((DHashtable.ChordNode)this.getStage().message.target);
+            successor = ((src.ChordNode)this.getStage().message.target);
+        }
+
+        public void put(ChordKey key, String value) {
+            local.put(key, value);
+            StageService.sendMessage(local_output, 12 /*println*/, new Object[]{++count + " Storing " + key});
         }
 
         public void stabilize() {
             System.out.println(" \n\n");
             System.out.println("Stabilizing " + this.getName());
-            TokenDirector node = StageService.sendTokenMessage(successor, 33 /*getPredecessor*/, null);
-            StageService.sendMessage(((DHashtable.ChordNode)this.getStage().message.target), 11 /*stabilize*/, new Object[]{node}, new int[]{0});
+            TokenDirector node = StageService.sendTokenMessage(successor, 34 /*getPredecessor*/, null);
+            StageService.sendMessage(((src.ChordNode)this.getStage().message.target), 12 /*stabilize*/, new Object[]{node}, new int[]{0});
         }
 
         public void stabilize(ChordNode node) throws TokenPassException {
             if (node != null) {
                 System.out.println("Succ Pred is + " + node.getName());
-                TokenDirector key = StageService.sendTokenMessage(node, 31 /*getNodeKey*/, null);
-                TokenDirector selfKey = StageService.sendTokenMessage(((DHashtable.ChordNode)this.getStage().message.target), 31 /*getNodeKey*/, null);
-                TokenDirector successorKey = StageService.sendTokenMessage(successor, 31 /*getNodeKey*/, null);
-                StageService.sendPassMessage(((DHashtable.ChordNode)this.getStage().message.target), 12 /*stabilize*/, new Object[]{key, selfKey, successorKey, node}, new int[]{0, 1, 2}, this.getStage().message.continuationDirector);
+                TokenDirector key = StageService.sendTokenMessage(node, 32 /*getNodeKey*/, null);
+                TokenDirector selfKey = StageService.sendTokenMessage(((src.ChordNode)this.getStage().message.target), 32 /*getNodeKey*/, null);
+                TokenDirector successorKey = StageService.sendTokenMessage(successor, 32 /*getNodeKey*/, null);
+                StageService.sendPassMessage(((src.ChordNode)this.getStage().message.target), 13 /*stabilize*/, new Object[]{key, selfKey, successorKey, node}, new int[]{0, 1, 2}, this.getStage().message.continuationDirector);
                 throw new TokenPassException();
             }
             
-            StageService.sendMessage(successor, 13 /*notifyPredecessor*/, new Object[]{((DHashtable.ChordNode)this.getStage().message.target)});
+            StageService.sendMessage(successor, 14 /*notifyPredecessor*/, new Object[]{((src.ChordNode)this.getStage().message.target)});
         }
 
         public void stabilize(ChordKey key, ChordKey selfKey, ChordKey successorKey, ChordNode node) {
-            if ((((DHashtable.ChordNode)this.getStage().message.target) == successor) || key.isBetween(selfKey, successorKey)) {
+            if ((((src.ChordNode)this.getStage().message.target) == successor) || key.isBetween(selfKey, successorKey)) {
                 successor = node;
             }
             
@@ -359,10 +367,10 @@ public class ChordNode extends MobileActor implements java.io.Serializable {
         public void notifyPredecessor(ChordNode node) {
             if (predecessor != null) {
                 System.out.println("Predecessor is + " + node.getName());
-                TokenDirector predecessorKey = StageService.sendTokenMessage(predecessor, 31 /*getNodeKey*/, null);
-                TokenDirector key = StageService.sendTokenMessage(node, 31 /*getNodeKey*/, null);
-                TokenDirector selfKey = StageService.sendTokenMessage(((DHashtable.ChordNode)this.getStage().message.target), 31 /*getNodeKey*/, null);
-                StageService.sendMessage(((DHashtable.ChordNode)this.getStage().message.target), 14 /*notifyPredecessor*/, new Object[]{node, key, selfKey, predecessorKey}, new int[]{1, 2, 3});
+                TokenDirector predecessorKey = StageService.sendTokenMessage(predecessor, 32 /*getNodeKey*/, null);
+                TokenDirector key = StageService.sendTokenMessage(node, 32 /*getNodeKey*/, null);
+                TokenDirector selfKey = StageService.sendTokenMessage(((src.ChordNode)this.getStage().message.target), 32 /*getNodeKey*/, null);
+                StageService.sendMessage(((src.ChordNode)this.getStage().message.target), 15 /*notifyPredecessor*/, new Object[]{node, key, selfKey, predecessorKey}, new int[]{1, 2, 3});
             }
             else {
                 predecessor = node;
@@ -381,8 +389,8 @@ public class ChordNode extends MobileActor implements java.io.Serializable {
             for (int i = 0; i < 32; i++) {
                 TokenDirector finger = StageService.sendTokenMessage(fingerTable, 4 /*getFinger*/, new Object[]{i});
                 TokenDirector key = StageService.sendTokenMessage(null, 2 /*getStart*/, null, finger);
-                TokenDirector successorNode = StageService.sendTokenMessage(((DHashtable.ChordNode)this.getStage().message.target), 19 /*findSuccessor*/, new Object[]{key}, new int[]{0});
-                StageService.sendMessage(((DHashtable.ChordNode)this.getStage().message.target), 22 /*setSuccessorNode*/, new Object[]{finger, successorNode}, new int[]{0, 1});
+                TokenDirector successorNode = StageService.sendTokenMessage(((src.ChordNode)this.getStage().message.target), 20 /*findSuccessor*/, new Object[]{key}, new int[]{0});
+                StageService.sendMessage(((src.ChordNode)this.getStage().message.target), 23 /*setSuccessorNode*/, new Object[]{finger, successorNode}, new int[]{0, 1});
             }
 
         }
@@ -390,18 +398,9 @@ public class ChordNode extends MobileActor implements java.io.Serializable {
         public void joinNode(ChordNode rootNode) throws TokenPassException {
             predecessor = null;
             ChordKey key = new ChordKey( this.getName() );
-            TokenDirector successor = StageService.sendTokenMessage(rootNode, 19 /*findSuccessor*/, new Object[]{(ChordKey)DeepCopy.deepCopy( key )});
-            ContinuationDirector continuation_token = StageService.sendContinuationMessage(((DHashtable.ChordNode)this.getStage().message.target), 17 /*joinSuccessor*/, new Object[]{successor}, new int[]{0});
-            continuation_token = StageService.sendContinuationMessage(local_output, 12 /*println*/, new Object[]{"node is  " + this.getName()}, continuation_token);
-            class ExpressionDirector1 extends Actor {
-                public ExpressionDirector1(int stage_id) { super(stage_id); }
-                public void invokeConstructor(int id, Object[] arguments) {}
-                public Object invokeMessage(int messageId, Object[] arguments) {
-                    return "Succesor  " + (ChordNode)arguments[0];
-                }
-            }
-            continuation_token = StageService.sendContinuationMessage(local_output, 12 /*println*/, new Object[]{StageService.sendImplicitTokenMessage(new ExpressionDirector1(this.getStageId()), 0, new Object[]{successor}, new int[]{0})}, new int[]{0}, continuation_token);
-            StageService.sendPassMessage(local_output, 12 /*println*/, new Object[]{"Predecesor  " + predecessor}, continuation_token, this.getStage().message.continuationDirector);
+            TokenDirector successor = StageService.sendTokenMessage(rootNode, 20 /*findSuccessor*/, new Object[]{(ChordKey)DeepCopy.deepCopy( key )});
+            ContinuationDirector continuation_token = StageService.sendContinuationMessage(((src.ChordNode)this.getStage().message.target), 18 /*joinSuccessor*/, new Object[]{successor}, new int[]{0});
+            StageService.sendPassMessage(local_output, 12 /*println*/, new Object[]{"node is  " + this.getName()}, continuation_token, this.getStage().message.continuationDirector);
             throw new TokenPassException();
         }
 
@@ -412,42 +411,40 @@ public class ChordNode extends MobileActor implements java.io.Serializable {
         public ChordNode findSuccessor(String nodeName) throws TokenPassException {
             ChordKey key = new ChordKey( nodeName );
             System.out.println("ChordKey found is " + key);
-            StageService.sendPassMessage(((DHashtable.ChordNode)this.getStage().message.target), 19 /*findSuccessor*/, new Object[]{(ChordKey)DeepCopy.deepCopy( key )}, this.getStage().message.continuationDirector);
+            StageService.sendPassMessage(((src.ChordNode)this.getStage().message.target), 20 /*findSuccessor*/, new Object[]{(ChordKey)DeepCopy.deepCopy( key )}, this.getStage().message.continuationDirector);
             throw new TokenPassException();
         }
 
         public ChordNode findSuccessor(ChordKey key) throws TokenPassException {
-            if (((DHashtable.ChordNode)this.getStage().message.target) == successor) {
-                return ((DHashtable.ChordNode)this.getStage().message.target);
+            if (((src.ChordNode)this.getStage().message.target) == successor) {
+                return ((src.ChordNode)this.getStage().message.target);
             }
             
-            System.out.println("attempt for successor");
-            TokenDirector thisKey = StageService.sendTokenMessage(((DHashtable.ChordNode)this.getStage().message.target), 31 /*getNodeKey*/, null);
-            TokenDirector successorKey = StageService.sendTokenMessage(successor, 31 /*getNodeKey*/, null);
-            StageService.sendPassMessage(((DHashtable.ChordNode)this.getStage().message.target), 20 /*findSuccessor*/, new Object[]{(ChordKey)DeepCopy.deepCopy( key ), thisKey, successorKey}, new int[]{1, 2}, this.getStage().message.continuationDirector);
+            TokenDirector thisKey = StageService.sendTokenMessage(((src.ChordNode)this.getStage().message.target), 32 /*getNodeKey*/, null);
+            TokenDirector successorKey = StageService.sendTokenMessage(successor, 32 /*getNodeKey*/, null);
+            StageService.sendPassMessage(((src.ChordNode)this.getStage().message.target), 21 /*findSuccessor*/, new Object[]{(ChordKey)DeepCopy.deepCopy( key ), thisKey, successorKey}, new int[]{1, 2}, this.getStage().message.continuationDirector);
             throw new TokenPassException();
         }
 
         public ChordNode findSuccessor(ChordKey key, ChordKey thisKey, ChordKey successorKey) throws TokenPassException {
             if (key.isBetween(thisKey, successorKey) || key.compareTo(successorKey) == 0) {
-                System.out.println("Successor is " + successor);
                 return successor;
             }
             else {
-                TokenDirector node = StageService.sendTokenMessage(((DHashtable.ChordNode)this.getStage().message.target), 23 /*closestPrecedingNode*/, new Object[]{(ChordKey)DeepCopy.deepCopy( key )});
-                StageService.sendPassMessage(((DHashtable.ChordNode)this.getStage().message.target), 21 /*findSuccessor*/, new Object[]{(ChordKey)DeepCopy.deepCopy( key ), node}, new int[]{1}, this.getStage().message.continuationDirector);
+                TokenDirector node = StageService.sendTokenMessage(((src.ChordNode)this.getStage().message.target), 24 /*closestPrecedingNode*/, new Object[]{(ChordKey)DeepCopy.deepCopy( key )});
+                StageService.sendPassMessage(((src.ChordNode)this.getStage().message.target), 22 /*findSuccessor*/, new Object[]{(ChordKey)DeepCopy.deepCopy( key ), node}, new int[]{1}, this.getStage().message.continuationDirector);
                 throw new TokenPassException();
             }
 
         }
 
         public ChordNode findSuccessor(ChordKey key, ChordNode node) throws TokenPassException {
-            if (node == ((DHashtable.ChordNode)this.getStage().message.target) && successor != null) {
-                StageService.sendPassMessage(successor, 19 /*findSuccessor*/, new Object[]{(ChordKey)DeepCopy.deepCopy( key )}, this.getStage().message.continuationDirector);
+            if (node == ((src.ChordNode)this.getStage().message.target) && successor != null) {
+                StageService.sendPassMessage(successor, 20 /*findSuccessor*/, new Object[]{(ChordKey)DeepCopy.deepCopy( key )}, this.getStage().message.continuationDirector);
                 throw new TokenPassException();
             }
             
-            StageService.sendPassMessage(node, 19 /*findSuccessor*/, new Object[]{(ChordKey)DeepCopy.deepCopy( key )}, this.getStage().message.continuationDirector);
+            StageService.sendPassMessage(node, 20 /*findSuccessor*/, new Object[]{(ChordKey)DeepCopy.deepCopy( key )}, this.getStage().message.continuationDirector);
             throw new TokenPassException();
         }
 
@@ -459,16 +456,16 @@ public class ChordNode extends MobileActor implements java.io.Serializable {
             for (int i = 31; i >= 0; i--) {
                 TokenDirector finger = StageService.sendTokenMessage(fingerTable, 4 /*getFinger*/, new Object[]{i});
                 TokenDirector node = StageService.sendTokenMessage(null, 4 /*getNode*/, null, finger);
-                TokenDirector fingerKey = StageService.sendTokenMessage(null, 31 /*getNodeKey*/, null, node);
-                TokenDirector nodeKey = StageService.sendTokenMessage(((DHashtable.ChordNode)this.getStage().message.target), 31 /*getNodeKey*/, null);
-                StageService.sendMessage(((DHashtable.ChordNode)this.getStage().message.target), 24 /*nextClosestNode*/, new Object[]{(ChordKey)DeepCopy.deepCopy( key ), nodeKey, fingerKey}, new int[]{1, 2});
+                TokenDirector fingerKey = StageService.sendTokenMessage(null, 32 /*getNodeKey*/, null, node);
+                TokenDirector nodeKey = StageService.sendTokenMessage(((src.ChordNode)this.getStage().message.target), 32 /*getNodeKey*/, null);
+                StageService.sendMessage(((src.ChordNode)this.getStage().message.target), 25 /*nextClosestNode*/, new Object[]{(ChordKey)DeepCopy.deepCopy( key ), nodeKey, fingerKey}, new int[]{1, 2});
                 if (success == true) {
                     StageService.passToken(node, this.getStage().message.continuationDirector);
                     throw new TokenPassException();
                 } 
             }
 
-            return ((DHashtable.ChordNode)this.getStage().message.target);
+            return ((src.ChordNode)this.getStage().message.target);
         }
 
         public void nextClosestNode(ChordKey key, ChordKey nodeKey, ChordKey fingerKey) {
@@ -488,7 +485,7 @@ public class ChordNode extends MobileActor implements java.io.Serializable {
 
         public void printFingerTable() {
             System.out.println("=======================================================");
-            System.out.println("FingerTable: " + ((DHashtable.ChordNode)this.getStage().message.target));
+            System.out.println("FingerTable: " + ((src.ChordNode)this.getStage().message.target));
             System.out.println("-------------------------------------------------------");
             System.out.println("Predecessor: " + predecessor);
             System.out.println("Successor: " + successor);
@@ -498,7 +495,7 @@ public class ChordNode extends MobileActor implements java.io.Serializable {
         public void continuePrint(Finger finger) {
             TokenDirector start = StageService.sendTokenMessage(finger, 2 /*getStart*/, null);
             TokenDirector node = StageService.sendTokenMessage(finger, 4 /*getNode*/, null);
-            StageService.sendMessage(((DHashtable.ChordNode)this.getStage().message.target), 28 /*continueToPrint*/, new Object[]{start, node}, new int[]{0, 1});
+            StageService.sendMessage(((src.ChordNode)this.getStage().message.target), 29 /*continueToPrint*/, new Object[]{start, node}, new int[]{0, 1});
         }
 
         public void continueToPrint(ChordKey start, ChordNode node) {
@@ -524,6 +521,11 @@ public class ChordNode extends MobileActor implements java.io.Serializable {
 
         public ChordNode getPredecessor() {
             return predecessor;
+        }
+
+        public void setRootPredecessor(ChordNode predecessor) {
+            StageService.sendMessage(StandardOutput.construct(0, null), 12 /*println*/, new Object[]{"predecessor" + predecessor});
+            this.predecessor = predecessor;
         }
 
         public void setPredecessor(ChordNode predecessor) {
